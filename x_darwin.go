@@ -18,13 +18,9 @@ func (a *Alert) alert() {
 		level = "critical"
 	}
 
-	format := `
-display alert %q
-	message %q
-	as %s
-`
+	format := "display alert %q message %q as %s"
 	script := fmt.Sprintf(format, a.Title, a.Message, level)
-	_ = exec.Command("osascript", "-e", script)
+	_ = exec.Command("osascript", "-e", script).Start()
 }
 
 func OpenUrl(url string) error { return exec.Command("open", url).Start() }
