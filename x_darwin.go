@@ -11,15 +11,15 @@ func (a *Alert) alert() {
 	var level string
 	switch a.Level {
 	case Informational:
-		level = "informational"
+		level = "note"
 	case Warning:
-		level = "warning"
+		level = "caution"
 	case Critical:
-		level = "critical"
+		level = "stop"
 	}
 
-	format := "display alert %q message %q as %s"
-	script := fmt.Sprintf(format, a.Title, a.Message, level)
+	format := "display dialog %q with title %q with icon %s"
+	script := fmt.Sprintf(format, a.Message, a.Title, level)
 	_ = exec.Command("osascript", "-e", script).Start()
 }
 
