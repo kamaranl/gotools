@@ -21,7 +21,9 @@ func (a *Alert) alert() {
 	format := "display dialog %q with title %q with icon %s"
 	script := fmt.Sprintf(format, a.Message, a.Title, level)
 	cmd := exec.Command("osascript", "-e", script)
-	_ = cmd.Start()
+	if _, err := cmd.Output(); err != nil {
+		return
+	}
 	a.OK = cmd.ProcessState.Success()
 }
 
