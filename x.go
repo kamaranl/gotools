@@ -2,10 +2,9 @@ package x
 
 import (
 	"strings"
-	"sync"
 )
 
-var state = NewLockedMap()
+var state = NewSafeMap()
 
 type AlertLevel int
 
@@ -19,8 +18,9 @@ type Alert struct {
 	Title   string
 	Message string
 	Level   AlertLevel
-	OK      bool
+	OnExit  func(ok bool)
 
+	ok    bool
 	label string
 }
 
@@ -43,65 +43,9 @@ func (a *Alert) Show() {
 
 	go func() {
 		a.alert()
+		if a.OnExit != nil {
+			a.OnExit(a.ok)
+		}
 		state.Set(a.label, false)
 	}()
-}
-
-type LockedMap struct {
-	Data map[string]any
-	m    sync.RWMutex
-}
-
-func NewLockedMap() *LockedMap {
-	return &LockedMap{Data: make(map[string]any)}
-}
-
-func (s *LockedMap) Get(key string) (any, bool) {
-	s.m.RLock()
-	defer s.m.RUnlock()
-	v, ok := s.Data[key]
-
-	return v, ok
-}
-
-func (s *LockedMap) Set(key string, value any) {
-	s.m.Lock()
-	s.Data[key] = value
-	s.m.Unlock()
-}
-
-func (s *LockedMap) Delete(key string) {
-	s.m.Lock()
-	delete(s.Data, key)
-	s.m.Unlock()
-}
-
-func (s *LockedMap) Clear() {
-	s.m.Lock()
-	s.Data = make(map[string]any)
-	s.m.Unlock()
-}
-
-func (s *LockedMap) Keys() []string {
-	keys := make([]string, 0, len(s.Data))
-	for k := range s.Data {
-		keys = append(keys, k)
-	}
-
-	return keys
-}
-
-func GetTypedFromLockedMap[T any](s *LockedMap, key string) (T, bool) {
-	s.m.RLock()
-	defer s.m.RUnlock()
-
-	v, ok := s.Data[key]
-	if !ok {
-		var z T
-		return z, ok
-	}
-
-	value, ok := v.(T)
-
-	return value, ok
 }

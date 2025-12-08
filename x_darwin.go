@@ -24,7 +24,7 @@ func (a *Alert) alert() {
 	if _, err := cmd.Output(); err != nil {
 		return
 	}
-	a.OK = cmd.ProcessState.Success()
+	a.ok = cmd.ProcessState.Success()
 }
 
 func OpenUrl(url string) error { return exec.Command("open", url).Start() }
