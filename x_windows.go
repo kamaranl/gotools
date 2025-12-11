@@ -19,12 +19,16 @@ func (a *Alert) alert() {
 		boxtype = windows.MB_ICONERROR
 	}
 
-	_, _ = windows.MessageBox(
+	ret, _ := windows.MessageBox(
 		0,
 		windows.StringToUTF16Ptr(a.Message),
 		windows.StringToUTF16Ptr(a.Title),
-		windows.MB_APPLMODAL|boxtype,
+		windows.MB_APPLMODAL|windows.MB_OKCANCEL|boxtype,
 	)
+
+	if ret == 1 {
+		a.ok = true
+	}
 }
 
 func OpenUrl(url string) error {

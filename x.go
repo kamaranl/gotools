@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-var state = NewSafeMap()
+var alerts = NewTypeSafeMap[*Alert]()
 
 type AlertLevel int
 
@@ -31,21 +31,21 @@ func NewAlert(title, message string, level AlertLevel) *Alert {
 		Title:   title,
 		Message: message,
 		Level:   level,
-		label:   "alert&" + label,
+		label:   "alert://" + label,
 	}
 }
 
 func (a *Alert) Show() {
-	if active, ok := GetTypedFromLockedMap[bool](state, a.label); ok && active {
+	if alert, ok := alerts.Get(a.label); ok && alert != nil {
 		return
 	}
-	state.Set(a.label, true)
 
+	alerts.Set(a.label, a)
 	go func() {
 		a.alert()
 		if a.OnExit != nil {
 			a.OnExit(a.ok)
 		}
-		state.Set(a.label, false)
+		alerts.Delete(a.label)
 	}()
 }
