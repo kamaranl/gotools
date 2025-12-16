@@ -1,3 +1,3 @@
-# x
+# gotools
 
-Personal Go helpers.
+A collection of my personal Go tools.
